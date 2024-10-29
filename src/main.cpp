@@ -5,12 +5,14 @@
 #define CAMERA_MODEL_AI_THINKER 
 
 #include "camera_pins.h"
+#include "secrets.h"
 
 // define constant
 #define ESP32CAM_LED_FLASH 4
 
 // put function declarations here:
 int myFunction(int, int);
+void connectWiFi();
 
 void setup() {
   Serial.begin(115200);
@@ -64,6 +66,21 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+}
+
+void connectWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  Serial.println("Connecting to Wi-Fi");
+ 
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.println(".");
+  }
+
+  Serial.println("Connectted to Wi-Fi");
 }
 
 // put function definitions here:
