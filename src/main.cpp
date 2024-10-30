@@ -1,6 +1,9 @@
 #include "Arduino.h"
 #include "esp_camera.h"
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <ArduinoJson.h>
+#include <PubSubClient.h>
 
 #define CAMERA_MODEL_AI_THINKER 
 
@@ -10,9 +13,16 @@
 // define constant
 #define ESP32CAM_LED_FLASH 4
 
+#define AWS_IOT_PUBLISH_TOPIC   ""      // Change data
+#define AWS_IOT_SUBSCRIBE_TOPIC ""      // Change data
+
 // put function declarations here:
 int myFunction(int, int);
 void connectWiFi();
+void connectAWS();
+
+WiFiClientSecure net = WiFiClientSecure();
+PubSubClient client(net);
 
 void setup() {
   Serial.begin(115200);
@@ -21,6 +31,7 @@ void setup() {
   Serial.println();
   Serial.println("MYCO CAMERA V1");
   Serial.println();
+  void messageHandler(char* topic, byte* payload, unsigned int length);
 
   // FLASH LED
   pinMode(ESP32CAM_LED_FLASH, OUTPUT);
@@ -81,6 +92,47 @@ void connectWiFi() {
   }
 
   Serial.println("Connectted to Wi-Fi");
+}
+
+void messageHandler(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Incoming: ");
+  Serial.println(topic);
+ 
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, payload);
+  const char* message = doc["message"];
+  Serial.println(message);
+}
+
+void connectAWS() {
+  // Configure WiFiClientSecure to use the AWS IoT device credentials
+  net.setCACert(AWS_CERT_CA);
+  net.setCertificate(AWS_CERT_CRT);
+  net.setPrivateKey(AWS_CERT_PRIVATE);
+
+  // Connect to the MQTT broker on the AWS endpoint we defined earlier
+  client.setServer(AWS_IOT_ENDPOINT, 8883);
+
+  // Create a message handler
+  client.setCallback(messageHandler);
+
+  Serial.println("Connecting to AWS IOT");
+
+  while (!client.connect(THINGNAME))
+  {
+    Serial.print(".");
+    delay(100);
+  }
+ 
+  if (!client.connected())
+  {
+    Serial.println("AWS IoT Timeout!");
+    return;
+  }
+
+  client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+ 
+  Serial.println("AWS IoT Connected!");
 }
 
 // put function definitions here:
