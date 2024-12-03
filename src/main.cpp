@@ -29,6 +29,8 @@ void connectWiFi();
 void connectAWS();
 void controlServo(boolean);
 boolean detectedObject();
+void messageHandler(char* topic, byte* payload, unsigned int length);
+boolean publishMessage(String buffer);
 
 WiFiClientSecure net = WiFiClientSecure();
 PubSubClient client(net);
@@ -70,13 +72,46 @@ void connectWiFi() {
 }
 
 void messageHandler(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Incoming: ");
+  Serial.print("Message arrived on topic: ");
   Serial.println(topic);
- 
+  Serial.println("Processing message...");
+
+  char jsonBuffer[length + 1];
+  memcpy(jsonBuffer, payload, length);
+  jsonBuffer[length] = '\0'; 
+
   StaticJsonDocument<200> doc;
-  deserializeJson(doc, payload);
-  const char* message = doc["message"];
-  Serial.println(message);
+  DeserializationError error = deserializeJson(doc, jsonBuffer);
+
+  if (error) {
+    Serial.print("JSON parse failed: ");
+    Serial.println(error.c_str());
+    return;
+  }
+
+  const char *controlBarie = doc["controlBarie"];
+  if (controlBarie) {
+    Serial.print("Control barie value: ");
+    Serial.println(controlBarie);
+  } else {
+    Serial.println("Key 'control' not found in JSON.");
+  }
+}
+
+boolean publishMessage(String buffer) {
+  StaticJsonDocument<80000> doc;
+  doc["image"] = buffer;
+  doc["dockId"] = DOCK_ID;
+
+  String json_payload;
+  serializeJson(doc, json_payload);
+
+  if (client.publish(AWS_IOT_PUBLISH_TOPIC, json_payload.c_str())) {
+    Serial.println("JSON image sent");
+  } else {
+    Serial.println("Failed to send JSON image");
+  }
+
 }
 
 void connectAWS() {
