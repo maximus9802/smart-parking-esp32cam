@@ -51,9 +51,9 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
-
-
+  client.loop();
+  Serial.println("------------------Loop------------");
+  delay(1000);
 }
 
 void connectWiFi() {
@@ -93,6 +93,14 @@ void messageHandler(char* topic, byte* payload, unsigned int length) {
   if (controlBarie) {
     Serial.print("Control barie value: ");
     Serial.println(controlBarie);
+    if (strcmp(controlBarie, "open") == 0) {
+      controlServo(true);
+    } else if (strcmp(controlBarie, "close") == 0) {
+      controlServo(false);
+    } else {
+      Serial.print("Unknown command: ");
+      Serial.println(controlBarie);
+    }
   } else {
     Serial.println("Key 'control' not found in JSON.");
   }
@@ -226,7 +234,6 @@ boolean detectedObject() {
     return true;
   } 
   return false;
-
 }
 
 // put function definitions here:
