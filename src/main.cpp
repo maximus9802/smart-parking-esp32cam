@@ -15,7 +15,7 @@
 // Define constant
 #define ESP32CAM_LED_FLASH 4
 #define AWS_IOT_PUBLISH_TOPIC   "esp32/pub"      // Change data
-#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/sub"      // Change data
+#define AWS_IOT_SUBSCRIBE_TOPIC "barrier-2"      // Change data
 #define SOUND_SPEED 0.034
 // #define CM_TO_INCH 0.393701
 #define LIMIT_DISTANCE 50
