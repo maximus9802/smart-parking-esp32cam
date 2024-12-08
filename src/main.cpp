@@ -131,10 +131,10 @@ boolean captureImageAndSend() {
 }
 
 void controlSystem() {
-  if (inDock == true) {
-    Serial.println("Dock has been rented!");
-    return;
-  }
+  // if (inDock == true) {
+  //   Serial.println("Dock has been rented!");
+  //   return;
+  // }
 
   if (isProcessing == true) {
     Serial.println("In processing...");
@@ -195,7 +195,7 @@ void messageHandler(char* topic, byte* payload, unsigned int length) {
     Serial.println(controlBarie);
     if (strcmp(controlBarie, "open") == 0) {
       controlServo(true);
-      inDock = true;
+      // inDock = true;
     } else if (strcmp(controlBarie, "close") == 0) {
       controlServo(false);
     } else {
